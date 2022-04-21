@@ -3,9 +3,6 @@
 /* Módulo 1 - Laboratório: 1 */
 /* Codigo: "Hello World" usando threads em C e a funcao que espera as threads terminarem */
 
-//TODO: Colocar esse código para funcionar com um número indefinido de threads
-//TOCHECK: Existe a possibilidade de verificarmos quantos nucleos/threads reais existem na máquina?
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
