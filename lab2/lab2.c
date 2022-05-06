@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include "timer.h"
+#include "../timer.h"
 
 // matrizes
 int *matriz1; //entrada
