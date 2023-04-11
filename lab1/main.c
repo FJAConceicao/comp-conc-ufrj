@@ -1,8 +1,7 @@
 /* Disciplina: Computacao Concorrente */
 /* Prof.: Silvana Rossetto */
 /* Módulo 1 - Laboratório: 1 */
-/* Codigo: Programa com duas threads que multiplica por 2 cada elemento de um vetor de 10000 elemen-
-tos. */
+/* Codigo: Programa com duas threads que multiplica por 2 cada elemento de um vetor de 10000 elementos. */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,7 +27,7 @@ void imprimeVetor() {
 }
 
 // funcao executada pelas threads
-void *elevaAoQuadrado (void *arg) {
+void *dobraValor (void *arg) {
   t_Args *args = (t_Args *) arg;
 
   int i = 0;
@@ -66,7 +65,7 @@ int main() {
     arg->nThreads = NTHREADS;
 
     printf("--Cria a thread %d\n", thread);
-    if (pthread_create(&tid_sistema[thread], NULL, elevaAoQuadrado, (void*) arg)) {
+    if (pthread_create(&tid_sistema[thread], NULL, dobraValor, (void*) arg)) {
       printf("--ERRO: pthread_create()\n"); exit(-1);
     }
   }
