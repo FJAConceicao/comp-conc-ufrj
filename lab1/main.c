@@ -1,13 +1,14 @@
 /* Disciplina: Computacao Concorrente */
 /* Prof.: Silvana Rossetto */
 /* Módulo 1 - Laboratório: 1 */
-/* Codigo: "Hello World" usando threads em C e a funcao que espera as threads terminarem */
+/* Codigo: Programa com duas threads que multiplica por 2 cada elemento de um vetor de 10000 elemen-
+tos. */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 
-#define NTHREADS  2 //total de threads a serem criadas
+#define NTHREADS 2 //total de threads a serem criadas
 #define SIZE 10000;
 
 int v[10000];
@@ -22,9 +23,8 @@ void imprimeVetor() {
   int i = 0;
   printf("Imprimindo vetor e seus elementos:\n");
   for (i = 0; i < 10000; ++i) {
-     printf("[%d] %d |", i, v[i]);
+     printf("|%d * 2 = %d|\n", i, v[i]);
   }
-
 }
 
 // funcao executada pelas threads
@@ -34,11 +34,11 @@ void *elevaAoQuadrado (void *arg) {
   int i = 0;
   if (args->idThread == 0) {
       for (i = 0; i < 5000; ++i) {
-          v[i] = v[i]*v[i];
+          v[i] = v[i]*2;
       }
   } else {
       for (i = 5000; i < 10000; ++i) {
-          v[i] = v[i]*v[i];
+          v[i] = v[i]*2;
       }
   }
 
@@ -77,7 +77,6 @@ int main() {
          printf("--ERRO: pthread_join() \n"); exit(-1);
     }
   }
-
 
   imprimeVetor();
 
