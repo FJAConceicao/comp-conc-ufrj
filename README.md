@@ -1,1 +1,1 @@
-# comp-conc-22-1-ufrj
+# comp-conc-ufrj
