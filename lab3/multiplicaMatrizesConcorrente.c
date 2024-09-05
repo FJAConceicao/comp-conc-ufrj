@@ -1,11 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include "timer.h"
 
 typedef struct {
     int linhas, colunas;
     float *dados;
 } Matriz;
+
+int nthreads;
+double inicio, fim, delta;
+Matriz *matriz1, *matriz2, *matrizResultante;
 
 int leMatrizDeArquivoBinario(const char *nomeArquivo, Matriz *matriz) {
     long long int tam; //qtde de elementos na matriz
@@ -36,23 +41,48 @@ int leMatrizDeArquivoBinario(const char *nomeArquivo, Matriz *matriz) {
     return 0;
 }
 
+void *multiplicaMatrizesPorLinhas(void *threadId) {
+    long int threadID = (long int) threadId;
+
+    //Cada thread começa processando a linha de seu ID e processam as próximas linhas de nthreads em nthreads
+    for (long int indiceLinha = threadID; indiceLinha < matriz1->linhas; indiceLinha += nthreads) {
+        for (long int indiceColuna = 0; indiceColuna < matriz2->colunas; indiceColuna++) {
+            matrizResultante->dados[indiceLinha * matriz2->colunas + indiceColuna] = 0.0;
+            for (long int indiceElemLinhaColuna = 0; indiceElemLinhaColuna < matriz1->colunas; indiceElemLinhaColuna++) {
+                float resultMultElemLinhaColuna = matriz1->dados[indiceLinha * matriz1->colunas + indiceElemLinhaColuna] * matriz2->dados[indiceElemLinhaColuna * matriz2->colunas + indiceColuna];
+                matrizResultante->dados[indiceLinha * matriz2->colunas + indiceColuna] += resultMultElemLinhaColuna;
+            }
+        }
+    }
+
+    pthread_exit(NULL);
+}
+
 int main(int argc, char *argv[]) {
 
-    double inicio, fim, delta;
-
     GET_TIME(inicio);
-    if (argc < 4) {printf("Uso: %s <arquivo da matriz 1> <arquivo da matriz 2> <arquivo da matriz de saída>\n", argv[0]); return 1;}
+    if (argc < 5) {printf("Uso: %s <arquivo da matriz 1> <arquivo da matriz 2> <arquivo da matriz de saída> <quantidade de threads>\n", argv[0]); return 1;}
 
     //aloca memória para matrizes de entrada
-    Matriz *matriz1 = (Matriz*) malloc(sizeof(Matriz));
+    matriz1 = (Matriz*) malloc(sizeof(Matriz));
     if(matriz1 == NULL) {printf("Erro de alocação de memória para a matriz"); return 2;}
-    Matriz *matriz2 = (Matriz*) malloc(sizeof(Matriz));
+    matriz2 = (Matriz*) malloc(sizeof(Matriz));
     if(matriz2 == NULL) {printf("Erro de alocação de memória para a matriz"); return 2;}
 
     //le as matrizes dos arquivos de entrada
     if (leMatrizDeArquivoBinario(argv[1], matriz1) != 0 || leMatrizDeArquivoBinario(argv[2], matriz2) != 0) {
         printf("Erro na leitura das matrizes de entrada"); return 3;
     }
+    
+    //le o número de threads da entrada do usuário
+    nthreads = atoi(argv[4]);
+    if (nthreads > matriz1->linhas) nthreads = matriz1->linhas;
+
+    // Aloca espaço para os identificadores das threads no sistema
+    pthread_t *tid_sistema;
+    tid_sistema = (pthread_t *) malloc(sizeof(pthread_t) * nthreads);
+    if (tid_sistema == NULL) {printf("Erro na alocação de memória para identificadores das threads no sistema\n"); exit(-1);}
+
     GET_TIME(fim);
     delta = fim - inicio;
     printf("Tempos de execução - Concorrente:\n\n");
@@ -63,7 +93,7 @@ int main(int argc, char *argv[]) {
     if (matriz1->colunas != matriz2->linhas) {printf("Erro durante a verificação das dimensões das matrizes, incompatíveis para multiplicação.\n"); return 4;}
 
     //criar, alocar memória e inserir informações na matriz resultante
-    Matriz *matrizResultante = (Matriz*) malloc(sizeof(Matriz));
+    matrizResultante = (Matriz*) malloc(sizeof(Matriz));
     if(matriz2 == NULL) {printf("Erro de alocação de memória para a matriz"); return 5;}
 
     matrizResultante->linhas = matriz1->linhas;
@@ -72,16 +102,15 @@ int main(int argc, char *argv[]) {
     matrizResultante->dados = (float *)malloc(sizeof(float) * qtdeElemenMatResult);
     if(matrizResultante->dados == NULL) {printf("Erro na alocação de memória para a matriz resultante"); return 5;}
 
-    //multiplicar as matrizes de maneira sequencial
-    for (long int indiceLinha = 0; indiceLinha < matriz1->linhas; indiceLinha++) {
-        for (long int indiceColuna = 0; indiceColuna < matriz2->colunas; indiceColuna++) {
-            matrizResultante->dados[indiceLinha * matriz2->colunas + indiceColuna] = 0.0;
-            for (long int indiceElemLinhaColuna = 0; indiceElemLinhaColuna < matriz1->colunas; indiceElemLinhaColuna++) {
-                float resultMultElemLinhaColuna = matriz1->dados[indiceLinha * matriz1->colunas + indiceElemLinhaColuna] * matriz2->dados[indiceElemLinhaColuna * matriz2->colunas + indiceColuna];
-                matrizResultante->dados[indiceLinha * matriz2->colunas + indiceColuna] += resultMultElemLinhaColuna;
-            }
+    //cria as threads
+    for (long int i = 0; i < nthreads; i++) {
+        if (pthread_create(&tid_sistema[i], NULL, multiplicaMatrizesPorLinhas, (void*) i)) {
+            printf("Erro na criação de threads\n"); exit(-1);
         }
     }
+
+    //espera todas as threads terminarem
+    for (int i = 0; i < nthreads; i++) {pthread_join(tid_sistema[i], NULL);}
 
     GET_TIME(fim);
     delta = fim - inicio;
