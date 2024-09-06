@@ -1,1 +1,0 @@
-# comp-conc-ufrj

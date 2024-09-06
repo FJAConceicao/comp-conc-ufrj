@@ -2,18 +2,15 @@
 
 quantidadeExecucoes=5
 
-#limpa resultados anterios no arquivo csv de tempos de execução
-#echo "" > temposExecucao.csv
-
 #dados para a geração dos resultados
 dimensoesMatrizes=("500" "1000" "2000")
 quantidadeThreads=("1" "2" "4" "8")
 
 #gera as matrizes de entrada
-#for dimensaoMatriz in "${dimensoesMatrizes[@]}"; do
-#    ./geraMatrizBinario $dimensaoMatriz $dimensaoMatriz "matrix_A_${dimensaoMatriz}.bin"
-#    ./geraMatrizBinario $dimensaoMatriz $dimensaoMatriz "matrix_B_${dimensaoMatriz}.bin"
-#done
+for dimensaoMatriz in "${dimensoesMatrizes[@]}"; do
+    ./geraMatrizBinario $dimensaoMatriz $dimensaoMatriz "matrix_A_${dimensaoMatriz}.bin"
+    ./geraMatrizBinario $dimensaoMatriz $dimensaoMatriz "matrix_B_${dimensaoMatriz}.bin"
+done
 
 #roda multiplicação sequencial e concorrente (com diferentes números de threads)
 for dimensaoMatriz in "${dimensoesMatrizes[@]}"; do
