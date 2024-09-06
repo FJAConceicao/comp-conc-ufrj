@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include "timer.h"
+#define SALVA_TEMPOS_EXECUCAO
 
 typedef struct {
     int linhas, colunas;
@@ -88,6 +89,13 @@ int main(int argc, char *argv[]) {
     printf("Tempos de execução - Concorrente:\n\n");
     printf("Tempo de inicialização: %lf\n", delta);
 
+    //salva tempo de inicialização
+    #ifdef SALVA_TEMPOS_EXECUCAO
+    FILE *descritorArquivoTemposExecucao = fopen("temposExecucao.csv", "a");
+    if (descritorArquivoTemposExecucao == NULL) {fprintf(stderr, "Erro ao abrir arquivo de tempos de execução"); exit(-1);}
+    fprintf(descritorArquivoTemposExecucao, "%d, %d, %f,", nthreads, matriz1->colunas, delta);
+    #endif
+
     GET_TIME(inicio);
     //verificar se as dimensões das matrizes combinam para multiplicação
     if (matriz1->colunas != matriz2->linhas) {printf("Erro durante a verificação das dimensões das matrizes, incompatíveis para multiplicação.\n"); return 4;}
@@ -116,6 +124,11 @@ int main(int argc, char *argv[]) {
     delta = fim - inicio;
     printf("Tempo de multiplicação: %lf\n", delta);
 
+    //salva tempo de multiplicação
+    #ifdef SALVA_TEMPOS_EXECUCAO
+    fprintf(descritorArquivoTemposExecucao, " %f,", delta);
+    #endif
+
     GET_TIME(inicio);
     //abrir arquivo de saída para escrever dados do resultado das duas matrizes
     FILE * descritorArquivo; //descritor do arquivo de saida
@@ -140,6 +153,12 @@ int main(int argc, char *argv[]) {
     GET_TIME(fim);
     delta = fim - inicio;
     printf("Tempo de finalização: %lf\n", delta);
+
+    //salva tempo de finalização e fecha o arquivo
+    #ifdef SALVA_TEMPOS_EXECUCAO
+    fprintf(descritorArquivoTemposExecucao, " %f\n", delta);
+    fclose(descritorArquivoTemposExecucao);
+    #endif
 
     return 0;
 }

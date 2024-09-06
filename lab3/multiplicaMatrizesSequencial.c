@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "timer.h"
+#define SALVA_TEMPOS_EXECUCAO
 
 typedef struct {
     int linhas, colunas;
@@ -57,6 +58,13 @@ int main(int argc, char *argv[]) {
     delta = fim - inicio;
     printf("Tempos de execução - Concorrente:\n\n");
     printf("Tempo de inicialização: %lf\n", delta);
+    
+    //salva tempo de inicialização
+    #ifdef SALVA_TEMPOS_EXECUCAO
+    FILE *descritorArquivoTemposExecucao = fopen("temposExecucao.csv", "a");
+    if (descritorArquivoTemposExecucao == NULL) {fprintf(stderr, "Erro ao abrir arquivo de tempos de execução"); exit(-1);}
+    fprintf(descritorArquivoTemposExecucao, "0, %d, %f,", matriz1->colunas, delta);
+    #endif
 
     GET_TIME(inicio);
     //verificar se as dimensões das matrizes combinam para multiplicação
@@ -87,9 +95,14 @@ int main(int argc, char *argv[]) {
     delta = fim - inicio;
     printf("Tempo de multiplicação: %lf\n", delta);
 
+    //salva tempo de multiplicação
+    #ifdef SALVA_TEMPOS_EXECUCAO
+    fprintf(descritorArquivoTemposExecucao, " %f,", delta);
+    #endif
+
     GET_TIME(inicio);
     //abrir arquivo de saída para escrever dados do resultado das duas matrizes
-    FILE * descritorArquivo; //descritor do arquivo de saida
+    FILE *descritorArquivo; //descritor do arquivo de saida
     size_t ret; //retorno da funcao de escrita no arquivo de saida
     descritorArquivo = fopen(argv[3], "wb"); //abre o arquivo para escrita binaria
     if(!descritorArquivo) {fprintf(stderr, "Erro de abertura do arquivo\n"); return 6;}
@@ -111,6 +124,12 @@ int main(int argc, char *argv[]) {
     GET_TIME(fim);
     delta = fim - inicio;
     printf("Tempo de finalização: %lf\n", delta);
+
+    //salva tempo de finalização e fecha o arquivo
+    #ifdef SALVA_TEMPOS_EXECUCAO
+    fprintf(descritorArquivoTemposExecucao, " %f\n", delta);
+    fclose(descritorArquivoTemposExecucao);
+    #endif
 
     return 0;
 }
