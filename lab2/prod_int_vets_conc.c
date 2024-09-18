@@ -1,13 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <pthread.h>
 
 // Variáveis globais
 long int n;
 float *vetor1, *vetor2;
 int nthreads;
-double prodIntGlobal = 0.0;
-float *prodIntRetThread; //Para pegar valor parcial do produto interno retornado pelas threads
 
 // Função executada pelas threads
 void *CalcProdInt(void *tid) {
@@ -35,6 +34,8 @@ void *CalcProdInt(void *tid) {
 int main(int argc, char *argv[]) {
     FILE *arq; //arquivo de entrada
     size_t ret; //retorno da funcao de leitura no arquivo de entrada
+    double prodIntGlobal = 0.0;
+    float *prodIntRetThread; //Para pegar valor parcial do produto interno retornado pelas threads
 
     // Valida e recebe os valores de entrada
     if (argc < 3) {
@@ -114,7 +115,7 @@ int main(int argc, char *argv[]) {
     printf("Registrado no arquivo...........: %.26lf\n", prodIntArq);
 
     // Calcula e exibe variância relativa
-    float varianciaRelativa = ((prodIntArq - prodIntGlobal) / prodIntArq) * 100;
+    float varianciaRelativa = (fabs(prodIntArq - prodIntGlobal) / fabs(prodIntArq)) * 100;
     printf("Variância Relativa: %.14f\n", varianciaRelativa);
 
     // Desaloca os espaços de memória
@@ -124,5 +125,4 @@ int main(int argc, char *argv[]) {
     fclose(arq);
 
     return 0;
-
 }

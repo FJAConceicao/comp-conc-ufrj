@@ -10,7 +10,6 @@ typedef struct {
 } Matriz;
 
 int nthreads;
-double inicio, fim, delta;
 Matriz *matriz1, *matriz2, *matrizResultante;
 
 int leMatrizDeArquivoBinario(const char *nomeArquivo, Matriz *matriz) {
@@ -61,6 +60,8 @@ void *multiplicaMatrizesPorLinhas(void *threadId) {
 
 int main(int argc, char *argv[]) {
 
+    double inicio, fim, delta;
+    
     GET_TIME(inicio);
     if (argc < 5) {printf("Uso: %s <arquivo da matriz 1> <arquivo da matriz 2> <arquivo da matriz de saída> <quantidade de threads>\n", argv[0]); return 1;}
 
@@ -118,7 +119,11 @@ int main(int argc, char *argv[]) {
     }
 
     //espera todas as threads terminarem
-    for (int i = 0; i < nthreads; i++) {pthread_join(tid_sistema[i], NULL);}
+    for (int i = 0; i < nthreads; i++) {
+        if(pthread_join(tid_sistema[i], NULL)) {
+            printf("Erro na espera da finalização das threads\n"); exit(-1);
+        }
+    }
 
     GET_TIME(fim);
     delta = fim - inicio;

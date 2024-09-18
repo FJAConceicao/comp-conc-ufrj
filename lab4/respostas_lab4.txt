@@ -1,0 +1,254 @@
+Atividade 1:
+
+1) A saída esperada é o valor referente a quantidade de threads multiplicada por 100000 (quantidade de incrementos que cada thread faz à variável soma).
+
+2) Resultado de executar várias vezes o programa:
+
+cods-lab4 ./soma 2
+Thread : 0 esta executando...
+Thread : 1 esta executando...
+Thread : 0 terminou!
+Thread : 1 terminou!
+Valor de 'soma' = 108173
+➜  cods-lab4 
+➜  cods-lab4 
+➜  cods-lab4 ./soma 2
+Thread : 0 esta executando...
+Thread : 1 esta executando...
+Thread : 0 terminou!
+Thread : 1 terminou!
+Valor de 'soma' = 106704
+➜  cods-lab4 
+➜  cods-lab4 ./soma 2
+Thread : 0 esta executando...
+Thread : 1 esta executando...
+Thread : 0 terminou!
+Thread : 1 terminou!
+Valor de 'soma' = 106475
+➜  cods-lab4 
+➜  cods-lab4 ./soma 2
+Thread : 0 esta executando...
+Thread : 1 esta executando...
+Thread : 0 terminou!
+Thread : 1 terminou!
+Valor de 'soma' = 105713
+➜  cods-lab4 
+
+3) Sim, pois várias threads realizam incrementos sobre a mesma variável global "soma" ao mesmo tempo, o que ocasiona em corrida de dados fazendo com o que algumas adições de valores à variável "soma" sejam sobrepostas na memória.
+
+4) Não, independente se ocorra condição de corrida ou não, cada uma das threads adiciona no máximo 100000 unidades a variável compartilhada "soma". Assim, o valor máximo que a variável "soma" pode atingir é 200000.
+
+----------------------------------------------------------------------------------------------------
+
+Atividade 2:
+
+2) Resultado de executar várias vezes o programa:
+
+cods-lab4 ./soma-lock 2
+Thread : 0 esta executando...
+Thread : 1 esta executando...
+Thread : 1 terminou!
+Thread : 0 terminou!
+Valor de 'soma' = 200000
+➜  cods-lab4 
+➜  cods-lab4 ./soma-lock 2
+Thread : 0 esta executando...
+Thread : 1 esta executando...
+Thread : 1 terminou!
+Thread : 0 terminou!
+Valor de 'soma' = 200000
+➜  cods-lab4 
+➜  cods-lab4 ./soma-lock 2
+Thread : 0 esta executando...
+Thread : 1 esta executando...
+Thread : 0 terminou!
+Thread : 1 terminou!
+Valor de 'soma' = 200000
+
+Sim, os valores impressos foram sempre os valores esperados. Isso é devido a exclusão mutua que ocorre entre as threads, de maneira que uma thread ao acessar um valor na área compartilhada bloqueasse a outra thread de acesso simultâneo, dessa maneira, não ocorre condição de corrida.
+
+3) Alterando a quantidade de threads para 3, temos:
+
+cods-lab4 ./soma-lock 3
+Thread : 0 esta executando...
+Thread : 1 esta executando...
+Thread : 2 esta executando...
+Thread : 1 terminou!
+Thread : 2 terminou!
+Thread : 0 terminou!
+Valor de 'soma' = 300000
+➜  cods-lab4 
+➜  cods-lab4 
+➜  cods-lab4 ./soma-lock 3 
+Thread : 0 esta executando...
+Thread : 1 esta executando...
+Thread : 2 esta executando...
+Thread : 1 terminou!
+Thread : 2 terminou!
+Thread : 0 terminou!
+Valor de 'soma' = 300000
+
+Alterando a quantidade de threads para 4:
+
+cods-lab4 ./soma-lock 4
+Thread : 1 esta executando...
+Thread : 3 esta executando...
+Thread : 0 esta executando...
+Thread : 2 esta executando...
+Thread : 3 terminou!
+Thread : 1 terminou!
+Thread : 2 terminou!
+Thread : 0 terminou!
+Valor de 'soma' = 400000
+➜  cods-lab4 
+➜  cods-lab4 ./soma-lock 4
+Thread : 0 esta executando...
+Thread : 3 esta executando...
+Thread : 1 esta executando...
+Thread : 2 esta executando...
+Thread : 3 terminou!
+Thread : 0 terminou!
+Thread : 1 terminou!
+Thread : 2 terminou!
+Valor de 'soma' = 400000
+
+Alterando a quantidade de threads para 5:
+
+cods-lab4 ./soma-lock 5
+Thread : 0 esta executando...
+Thread : 3 esta executando...
+Thread : 1 esta executando...
+Thread : 2 esta executando...
+Thread : 4 esta executando...
+Thread : 1 terminou!
+Thread : 2 terminou!
+Thread : 4 terminou!
+Thread : 0 terminou!
+Thread : 3 terminou!
+Valor de 'soma' = 500000
+➜  cods-lab4 
+➜  cods-lab4 
+➜  cods-lab4 ./soma-lock 5
+Thread : 0 esta executando...
+Thread : 2 esta executando...
+Thread : 3 esta executando...
+Thread : 1 esta executando...
+Thread : 4 esta executando...
+Thread : 2 terminou!
+Thread : 0 terminou!
+Thread : 4 terminou!
+Thread : 3 terminou!
+Thread : 1 terminou!
+Valor de 'soma' = 500000
+
+Devido a exclusão mutua, o resultado será sempre o esperado para quaisquer quantidade de threads que seja usada. O valor de soma será a quantidade de threads multiplicada por 100000 (quantidade de incrementos que cada thread faz à variável soma)
+
+----------------------------------------------------------------------------------------------------
+
+Atividade 3:
+
+2) Os valores que devem ser impressos na saída do programa são alguns ou vários dos múltiplos de 10 dentro da faixa de valores assumidos pela variável "soma", pois a thread "extra" imprime o valor de "soma" apenas quando ela é divisivel por 10. Entretanto, a thread "extra", não possui exclusão mútua adequada, assim ela pode ler valores inconsistentes de "soma" e os valores impressos podem não ser todos os múltiplos de 10 dentro da faixa de valores assumidos pela variável "soma".
+
+3) Resultado de executar várias vezes o programa:
+
+cods-lab4 ./soma-lock-atom 2
+Thread : 0 esta executando...
+Thread : 1 esta executando...
+Extra : esta executando...
+soma = 980 
+soma = 1120 
+soma = 1190 
+soma = 1220 
+soma = 1320 
+soma = 1401 
+soma = 1430 
+soma = 1430 
+soma = 1461 
+soma = 1541 
+soma = 1582 
+soma = 1682 
+soma = 1760 
+soma = 1830 
+soma = 1861 
+soma = 1950 
+soma = 2030 
+soma = 2111 
+soma = 2130 
+soma = 2210 
+soma = 2301 
+soma = 2372 
+soma = 2470 
+soma = 2491 
+soma = 2530 
+soma = 2610 
+soma = 2691 
+soma = 2761 
+soma = 2840 
+soma = 2850 
+soma = 2940 
+soma = 3031 
+soma = 3051 
+soma = 3130 
+soma = 3211 
+soma = 3241 
+soma = 3322 
+soma = 3401 
+soma = 3481 
+soma = 3550 
+soma = 3641 
+soma = 3721 
+soma = 3781 
+soma = 3850 
+soma = 3930 
+soma = 4020 
+soma = 4032 
+soma = 4110 
+soma = 4191 
+soma = 4280 
+soma = 4361 
+soma = 4442 
+Extra : terminou!
+Thread : 0 terminou!
+Thread : 1 terminou!
+Valor de 'soma' = 200000
+➜  cods-lab4 
+➜  cods-lab4 ./soma-lock-atom 3
+Thread : 0 esta executando...
+Extra : esta executando...
+soma = 710 
+soma = 1021 
+soma = 1280 
+soma = 1550 
+Thread : 1 esta executando...
+soma = 1791 
+soma = 2520 
+soma = 2680 
+soma = 2930 
+Thread : 2 esta executando...
+soma = 2950 
+soma = 3212 
+soma = 3290 
+soma = 3330 
+soma = 3340 
+soma = 3430 
+soma = 3512 
+soma = 3620 
+soma = 3630 
+soma = 3660 
+soma = 3670 
+soma = 3792 
+soma = 3880 
+soma = 3950 
+soma = 4030 
+soma = 4100 
+Extra : terminou!
+Thread : 1 terminou!
+Thread : 2 terminou!
+Thread : 0 terminou!
+Valor de 'soma' = 300000
+
+Os valores impressos nem sempre foram os valores esperados devido a violação de atomicidade que ocorre no acesso a variável "soma" dentro da thread "extra", a qual está sendo alterada ao mesmo tempo por várias threads. Essa violação ocorre, pois a thread "extra" não tem exclusão mutua adequada, assim ocorre corrida de dados quando ela está em execução, dessa forma a leitura da variável "soma" pela mesma acaba ficando instável, em que ela pode ler valores desatualizados ou inconsistentes e afetar os valores impressos na saída.
+
+4) Foi necessário adaptar a leitura de soma pela thread "extra" para que seja feita dentro de uma seção crítica protegida por um mutex, assim como acontece na escrita realizada pelas outras threads. Dessa forma, os valores esperados na saída do programa serão alguns ou vários dos múltiplos de 10 dentro da faixa de valores assumidos pela variável "soma"
+
+5) O programa deve imprimir corretamente todos os múltiplos de 10 da variável "soma", sem mostrar valores incorretos. Como a leitura também está protegida pelo mutex, o acesso à variável "soma" é controlado e sincronizado entre todas as threads sem ocorrer corrida de dados na leitura da variável "soma" dentro da thread "extra", o que afetava os resultados.

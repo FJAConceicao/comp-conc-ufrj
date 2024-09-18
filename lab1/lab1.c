@@ -40,14 +40,14 @@ void* incrementaUm(void* arg) {
 }
 
 // Função para verificar se o vetor foi incrementado corretamente
-void checaVetor(int* vetorInicial, int* vetorParaVerificar, int tamanho) {
+int checaVetor(int* vetorInicial, int* vetorParaVerificar, int tamanho) {
     for (int i = 0; i < tamanho; i++) {
         if (vetorParaVerificar[i] != (vetorInicial[i] + 1)) {
             printf("--ERRO: elemento %d não foi incrementado corretamente\n", i);
-            return;
+            return 0;
         }
     }
-    printf("Vetor incrementado corretamente!\n");
+    return 1;
 }
 
 int main(int argc, char* argv[]) {
@@ -110,17 +110,24 @@ int main(int argc, char* argv[]) {
             argsThread[indiceThread]->indiceFim = argsThread[indiceThread]->indiceInicio + indicesPorThread;
         }
 
-        pthread_create(&tid_sistema[indiceThread], NULL, incrementaUm, (void*)argsThread[indiceThread]);
+        if (pthread_create(&tid_sistema[indiceThread], NULL, incrementaUm, (void*)argsThread[indiceThread])) {
+            printf("--ERRO: pthread_create()\n");
+            return 2;
+        }
     }
 
     // Espera todas as threads terminarem de executar
     for (int indiceThread = 0; indiceThread < M; indiceThread++) {
-        pthread_join(tid_sistema[indiceThread], NULL);
+        if(pthread_join(tid_sistema[indiceThread], NULL)) {
+            printf("--ERRO: pthread_join() da thread %d\n", indiceThread);
+        }
     }
 
     // Checar se vetor foi processado de maneira correta
     printf("Vetor Incrementado: "); imprimirVetor(vetorParaIncrementar, N);
-    checaVetor(vetorInicial, vetorParaIncrementar, N);
+    if(checaVetor(vetorInicial, vetorParaIncrementar, N)) {
+        printf("Vetor incrementado corretamente!\n");
+    }
 
     // Libera memória alocada
     free(vetorInicial);
