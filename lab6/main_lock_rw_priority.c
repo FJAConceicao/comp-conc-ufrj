@@ -13,9 +13,8 @@
 //lista compartilhada iniciada 
 struct list_node_s* head_p = NULL; 
 
-//qtde de threads no programa, leitores e escritores
-int nthreads, leit, escr;
-int querEscrever = 0; // para controlar quando threads de escrita devem ganhar prioridade
+//qtde de threads no programa, leitores e escritores e contador de quantidade de escritores esperando para serem atendidos
+int nthreads, leit, escr, escritoresEmEspera = 0;
 
 //locks de exclusao mutua e condicionais de leitura e escrita
 pthread_mutex_t mutex;
@@ -24,10 +23,9 @@ pthread_cond_t cond_leit, cond_escr;
 void EntraLeitura(long int id) {
 	pthread_mutex_lock(&mutex);
    printf("Thread leitora %ld tenta ler\n", id);
-	/* Se tem escritor escrevendo (escr > 0) ou
-       querEscrever (alguma thread está querendo escrever),
-       então thread que chega para ler fica em espera */
-	while((escr > 0) || (querEscrever == 1)) {
+	/* Se tem escritor escrevendo (escr > 0) ou quantidadade de escritores em espera for maior que 0
+      (alguma thread está querendo escrever), então thread que chega para ler fica em espera */
+	while((escr > 0) || (escritoresEmEspera > 0)) {
       printf("Thread leitora %ld fica esperando, pois tem escritor ativo ou em espera\n", id);
 		pthread_cond_wait(&cond_leit, &mutex);
 	}
@@ -46,13 +44,14 @@ void SaiLeitura(long int id) {
 
 void EntraEscrita(long int id) {
 	pthread_mutex_lock(&mutex);
+   escritoresEmEspera++;
    printf("Thread escritora %ld tenta escrever\n", id);
 	while((leit>0) || (escr>0)) {
-		querEscrever = 1; // momento em que a thread solicita escrita
       printf("Thread escritora %ld fica esperando, pois tem threads escritoras ou leitoras ativas\n", id);
 		pthread_cond_wait(&cond_escr, &mutex);
 	}
 	escr++;
+   escritoresEmEspera--;
    printf("Thread escritora %ld começa escrita\n", id);
 	pthread_mutex_unlock(&mutex);
 }
@@ -60,10 +59,18 @@ void EntraEscrita(long int id) {
 void SaiEscrita(long int id) {
 	pthread_mutex_lock(&mutex);
 	escr--;
-   querEscrever = 0; // retorna para 0 indicando que a solicitação de escrita pela thread foi atendida
    printf("Thread escritora %ld termina escrita\n", id);
-	pthread_cond_signal(&cond_escr);
-	pthread_cond_broadcast(&cond_leit);
+
+   /*
+      Para priorizar escritor, libera um caso escr > 0
+      Libera leitores esperando caso contrário
+   */
+   if(escritoresEmEspera > 0) { 
+      pthread_cond_signal(&cond_escr);
+   } else {
+      pthread_cond_broadcast(&cond_leit);
+   }
+
 	pthread_mutex_unlock(&mutex);
 }
 
