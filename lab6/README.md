@@ -32,6 +32,12 @@ Para facilitar os testes, ajustei a distribuição das operações:
 
 A configuração original de apenas 1% para inserção e 1% para remoção dificultava a análise.
 
+Modifiquei as quatro funções de leitores e escritores passadas nos slides pela professora:
+
+- **EntraLeitura()**: As threads leitoras iniciam a leitura apenas quando nenhum escritor estiver ativo ou aguardando (ou seja, `escritoresEmEspera > 0`). Caso contrário, elas entram em estado de espera (`wait`) até receberem o sinal de que não há mais escritores atuando ou em espera. Adicionei um print para indicar que a thread leitora está aguardando devido à presença de uma escrita em andamento ou solicitada.
+- **SaiLeitura()**: Aqui, adicionei um print para notificar que a thread leitora concluiu sua operação.
+- **EntraEscrita()**: As threads escritoras logo que iniciam incrementam escritoresEmEspera em 1 unidade para serem priorizadas na execução e só começam a escrever quando não há leitores ativos ou outros escritores em ação. Caso contrário, elas entram em espera. A variável escritoresEmEspera é decrementada em 1 unidade assim que a thread consegue executar para indicar que ela saiu da fila de prioridade de execução. Adicionei também prints para indicar que a thread tenta escrever (inicio da função), está em espera (dentro do while) e começa escrita (depois do while).
+- **SaiEscrita()**: Ao terminar a escrita, além da quantidade de escritores atuando ser decrementada em 1 unidade, verifica-se também se há escritores em espera, caso positivo um sinal é enviado para liberar uma thread escritora garantindo assim a prioridade na execução de escritores e caso contrário as threads leitoras são sinalizadas/liberadas. Um print é exibido para indicar que a thread escritora finalizou sua operação.
 
 ## Perguntas do Laboratório
 
@@ -62,10 +68,11 @@ O rwlock é melhor em situações onde há muito mais leituras do que escritas. 
 
 As imagem abaixo mostra os logs de execução do programa:
 
-![telegram-cloud-photo-size-1-4916103843306122556-y](https://github.com/user-attachments/assets/fb69671e-97c2-4fd1-98a1-cad617ac5ccd)
+![telegram-cloud-photo-size-1-4920370528242479593-y](https://github.com/user-attachments/assets/e1acfab3-e9f1-44a3-8cf6-0f6ae911c2f1)
 
 ...
 
-![telegram-cloud-photo-size-1-4916103843306122557-y](https://github.com/user-attachments/assets/9e4cbbc1-39d0-46df-b0a9-dc7ae0c98b3e)
+![telegram-cloud-photo-size-1-4920370528242479595-y](https://github.com/user-attachments/assets/2bca293b-d04c-4b34-9688-9b06f286ef10)
+
 
 Em algumas partes do log é possível perceber a prioridade para escrita, em que leitor ao tentar ler e ainda tem threads escritoras ativas, leitor fica em espera aguardando as threads escritoras terminarem suas operações.
